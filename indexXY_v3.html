@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map 1</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body,
+        html {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: rgb(180, 142, 251);
+            background: linear-gradient(146deg, rgba(180, 142, 251, 0.4181022750897234) 24%, rgba(250, 198, 221, 1) 76%) fixed;
+
+
+        }
+
+        #map {
+            width: 1020px;
+            height: 700px;
+            margin: 10px 0;
+            background: transparent;
+
+        }
+
+        input {
+            margin-top: 5px;
+        }
+
+        .my-label_ {
+            position: absolute;
+            width: 80px;
+            height: 30px;
+            font-size: 15px;
+            color: #04a1fc;
+            text-align: center;
+            border: 1px solid blue;
+        }
+
+        .my_border {
+            border: 1px solid red;
+        }
+
+        .map__section {
+            display: flex;
+            justify-content: center;
+        }
+
+        .outer_container {
+            flex: 1 0 auto;
+        }
+
+        .container {
+            max-width: 1020px;
+            margin: 0 auto;
+        }
+
+        .head__section_data {
+            padding: 25px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 20px;
+            color: white;
+            background-color: #66339a;
+            font-weight: 900;
+            padding: 10px;
+        }
+
+        .info__section_data {
+            color: rgba(58, 53, 53, 0.808);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .search__section_data {
+            text-align: center;
+        }
+
+        .search_bar {
+            position: relative;
+            margin: 0 auto;
+            width: 630px;
+        }
+
+        #id_pixel_input {
+            width: 100%;
+            font-size: 15px;
+            color: #000;
+            font-weight: 500;
+            border-radius: 25px;
+            background-color: #fff;
+            outline: none;
+            border: 0;
+            text-align: center;
+            height: 50px;
+        }
+
+        #id_go {
+            position: absolute;
+            width: 120px;
+            top: 4px;
+            right: 0;
+            height: 44px;
+            background-color: #000;
+            color: #fff;
+            font-weight: 500;
+            font-size: 15px;
+            padding: 5px;
+            border-radius: 20px;
+        }
+
+        .id__controls {
+            display: none;
+        }
+
+        .footer__section {
+            margin-top: 50px;
+        }
+
+        .footer__data {
+            padding: 50px;
+            text-align: center;
+        }
+
+        .created {
+            font-size: 16px;
+            color: rgba(11, 13, 160, 0.808);
+            font-weight: 500;
+
+        }
+
+        .leafle-control {
+            display: none;
+        }
+
+        .hide-leaflet-logo {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="outer__container">
+
+        <div class="head__section">
+            <div class="head__section_data  container">
+                <div class="logo">LOGO</div>
+                <div class="email">info@gmail.com</div>
+            </div>
+        </div>
+        <div class="info__section">
+            <div class="info__section_data container">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio quod eos odit numquam enim!
+                    Corrupti,
+                    ullam neque laboriosam provident eligendi soluta reprehenderit quo molestias consectetur vero,
+                    maiores fugit corporis nostrum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet
+                    voluptas aliquam repellat! Cupiditate unde esse voluptatibus nostrum hic aliquid, necessitatibus
+                    facere, praesentium natus odio ipsum. Eius optio exercitationem aliquam hic.</p>
+            </div>
+        </div>
+        <div class="search__section">
+            <div class="search__section_data container">
+                <div class="search_bar">
+                    <input type="text" id="id_pixel_input" placeholder="Enter your number of pixel">
+                    <input type="button" value="Search" id="id_go" onclick="drawIDPoint(5)">
+                </div>
+            </div>
+        </div>
+
+        <div class="id__controls">
+            <input type="button" value="Сітка" onclick="showHideGrid(10)"><br />
+            <input type="button" value="Хрестик" onclick="showHideCross()"><br />
+            <input type="button" value="Круг" onclick="showHideCircle()"><br />
+        </div>
+
+        <div class="map__section">
+            <div id="map"></div>
+        </div>
+        <footer class="footer__section">
+            <div class="footer__data container">
+                <div class="created">Created by Fox</div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        var map;
+        var canvaEl = document.getElementById("map")
+        var circle_center_x = 5170 / 2, circle_center_y = 5170 / 2, circle_diameter = 5170;
+        //circle_center_x та circle_center_y - координати Leaflet
+        var myMarker;
+        var myPinMarker;
+        var myGreenPinMarker;
+        let circle_rows_array = []
+        let virtual_circle_model = []
+
+        var image_width = 5170, image_height = 5171;
+
+        const svgIcon = L.divIcon({
+            html: `
+            <div class="_my_border">
+                <?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 21 58.9" style="enable-background:new 0 0 21 58.9;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#2A37A9;}
+	.st1{fill:#2A36A8;}
+	.st2{fill:#FFFFFF;}
+	.st3{fill:#5E68D2;}
+</style>
+<g>
+	<polygon class="st3" points="10.5,58.8 4.5,7.3 16.4,7.3 	"/>
+	<circle class="st3" cx="10.5" cy="10.4" r="10.4"/>
+</g>
+</svg>
+
+                </div>`,
+            className: "",
+            //iconSize: [24, 40],
+            //iconAnchor: [12, 40],
+            iconSize: [20, 52],
+            iconAnchor: [20, 52],
+        });
+
+        var greenIcon = L.icon({
+            iconUrl: 'pin.png',
+            shadowUrl: 'pin.png',
+
+            iconSize: [38, 95], // size of the icon
+            shadowSize: [38, 95], // size of the shadow
+            iconAnchor: [19, 95], // point of the icon which will correspond to marker's location
+            shadowAnchor: [19, 95],  // the same for the shadow
+            popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+        });
+
+
+
+        var markersOnLayer = []
+        var squaresOnLayer = []
+        var crossOnLayer = []
+        var circleOnLayer = []
+        var markersLayerGroup = L.layerGroup(markersOnLayer)
+        var polygonsLayerGroup = L.layerGroup(squaresOnLayer)
+        var crossLayerGroup = L.layerGroup(crossOnLayer)
+        var circleLayerGroup = L.layerGroup(circleOnLayer)
+
+        var gridLinesOnLayer = []
+        var gridLayerGroup = L.layerGroup(gridLinesOnLayer)
+        var showGrid = false;
+        var showCross = false;
+        var showCircle = false;
+        //--------------------------------------------
+
+
+        var yx = L.latLng;
+        var xy = function (x, y) {
+            if (L.Util.isArray(x)) {    // When doing xy([x, y]);
+                return yx(x[1], x[0]);
+            }
+            return yx(y, x);  // When doing xy(x, y);
+        };
+
+
+        function initLMap() {
+
+            var imgDimensions = { width: image_width, height: image_height } //this is the height and width of the image. It hasn't been loaded yet.
+
+            map = L.map('map', {
+                maxZoom: 5,
+                minZoom: -5,
+                crs: L.CRS.Simple,
+                zoomControl: false,
+                layers: [markersLayerGroup, polygonsLayerGroup, gridLayerGroup, crossLayerGroup, circleLayerGroup]
+            })
+            //map.setView([imgDimensions.height / 2, imgDimensions.width / 2], 0);
+
+
+            //var imageUrl = 'https://media.istockphoto.com/vectors/bitcoin-internet-money-icon-vector-vector-id1139020309?k=20&m=1139020309&s=612x612&w=0&h=Y72ip4Gf2khJU5xYG9AO9sNmM-S_l-h7Ie7hOaaHDKs='
+            //var imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/768px-Bitcoin.svg.png'
+            //var imageUrl = 'http://127.0.0.1:8000/Logo_Bitcoin72ppi.png'
+            var imageUrl = 'https://1.bp.blogspot.com/-MIiZGYSNw88/YYJgVysOEJI/AAAAAAAAAhc/U5i2aDlc_3QfO4EjaHrwmkAmdEA-kkglACNcBGAsYHQ/s320/Logo%2BBitcoin72ppi.png'
+            var imageBounds = [
+                [imgDimensions.width, 0],
+                [0, imgDimensions.height]
+            ];
+            //debugger
+
+            //var layerGroup = L.layerGroup().addTo(map)
+            //L.marker(xy(3000, 3000), { draggable: true }).addTo(layerGroup);
+            //L.marker(xy(3000, 3000), { draggable: true }).addTo(markersLayerGroup);
+            //L.marker(xy(3050, 3000), { draggable: true }).addTo(markersLayerGroup);
+
+
+            L.imageOverlay(imageUrl, imageBounds).addTo(map);
+
+            //map.fitBounds(imageBounds);
+            map.setView(xy(circle_center_x, circle_center_y), -3.5);
+
+            /*myMarker = L.marker(xy(300.5, 300.5), { title: "MyPoint", alt: "The Big I", draggable: true }).addTo(map).on('dragend', function () {
+                var coord = String(myMarker.getLatLng()).split(',');
+                var lat = coord[0].split('(');
+                var lng = coord[1].split(')');
+                myMarker.bindPopup("Moved to: " + lat[1] + ", " + lng[0] + ".");
+            });*/
+
+            myPinMarker = L.marker([10000, 10000], { icon: svgIcon, title: "MyPoint", alt: "The Big I", draggable: true }).addTo(map)
+            myPinMarker.bindTooltip("", { permanent: true, direction: 'top', className: "my-label", offset: [-10, -55] }).openTooltip()
+            myPinMarker.on('dragend', function () {
+                var coord = String(myPinMarker.getLatLng()).split(',');
+                var lat = coord[0].split('(');
+                var lng = coord[1].split(')');
+                //myPinMarker.bindPopup(`Moved to:  + ${lat[1]} , ${lng[0]} ID=${getIDbyXY(Math.floor(Number(lng[0])), Math.floor(Number(lat[1])))}`)
+                let ID = getIDbyXY(Math.floor(Number(lng[0])), Math.floor(Number(lat[1])))
+                if (ID) {
+                    //myPinMarker.setTooltipContent(`X=${lng[0]} Y=${lat[1]} ID=${ID}`)
+                    myPinMarker.setTooltipContent(`${ID}`)
+                    polygonsLayerGroup.clearLayers()
+                    console.log('NOW WE DRAW', ID)
+                    draw1pxSquareByID(ID)
+                    console.log(polygonsLayerGroup)
+                } else {
+                    myPinMarker.setTooltipContent(`Out of circle`)
+                }
+            });
+
+            //myGreenPinMarker = L.marker([10, 10], { icon: greenIcon, draggable: true }).addTo(map);
+
+            //map.on('click', onMapClick);
+
+        }
+
+        function onMapClick(e) {
+            var coord = String(e.latlng).split(',');
+            var lat = coord[0].split('(');
+            var lng = coord[1].split(')');
+            //let ID = getIDbyXY(Math.floor(lng[0]), Math.floor(lat[1]))
+            //let row_ID = getRowIDbyXY(Math.floor(lng[0]), Math.floor(lat[1]))
+            let click_x = Math.floor(Number(lng[0]))
+            let click_y = Math.floor(Number(lat[1]))
+
+            let ID = getIDbyXY(click_x, click_y)
+            let row_ID = getRowIDbyXY(click_x, click_y)
+            /*var popup = L.popup();
+            popup
+                .setLatLng(e.latlng)
+                .setContent(`You clicked the map at  ${xy(lng[0], lat[1])}  ID=${ID}`)
+                .openOn(map);*/
+            console.log(`ID=${ID} X=${(lng[0])} Y=${(lat[1])}, X_LNG=${xy(lng[0], lat[1]).lng} Y_LAT=${xy(lng[0], lat[1]).lat}`)
+            //console.log(`ROW_ID_DATA=`, row_ID)
+            let x_id = findRowByID(ID)
+            console.log(`You clicked at X_FULL=${Number(lng[0])} Y_FULL=${Number(lat[1])} x_click=${click_x} y_click=${click_y}`)
+            if (x_id && ID) {
+                let pos_x = x_id.x
+                let pos_y = x_id.y
+                //draw1pxSquare(pos_x, pos_y, String(ID), { color: 'red', fillColor: '#787850' })
+                draw1pxSquare(pos_x, pos_y, ID, { color: 'red', fillColor: '#787850' })
+                map.setView(xy(pos_x, pos_y), 5, { animate: true, duration: 1.2 });
+                myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
+                myPinMarker.setTooltipContent(`${ID}`)
+
+            } else {
+                draw1pxSquare(click_x, click_y, 'BO', { color: 'lime', fillColor: '#787850' })
+            }
+        }
+
+
+        function draw1pxSquareByID(ID) {
+            let x_id = findRowByID(ID)
+            console.log('draw1pxSquareByID', x_id)
+            if (x_id) {
+                let pos_x = x_id.x
+                let pos_y = x_id.y
+                draw1pxSquare(pos_x, pos_y, String(ID))
+            }
+        }
+
+
+
+        function draw1pxSquare(startX, startY, text = '', params = { color: 'transparent', fillColor: 'white', opacity: 0.5 }) {
+            /*
+            Малює квадрат використовуючи координати Leaflet:
+            /\Y
+            |  
+            |  
+            |_________>X
+            (0;0)
+            */
+            function isInteger(num) {
+                return (num ^ 0) === num;
+            }
+            console.log(`draw1pxSquare RAW startX=${startX}, startY=${startY}`)
+            startX = isInteger(startX) ? startX + 0.1 : startX
+            startY = isInteger(startY) ? startY + 0.1 : startY
+            console.log(`draw1pxSquare CHANGED startX=${startX}, startY=${startY}`)
+            let asder = [
+                [Math.floor(startX), Math.floor(startY)],
+                [Math.ceil(startX), Math.ceil(startY) - 1],
+                [Math.ceil(startX), Math.ceil(startY)],
+                [Math.floor(startX), Math.floor(startY)]
+            ]
+            console.log(asder)
+
+            /*var polygon = L.polygon([
+                xy([Math.floor(startX), Math.floor(startY)]),
+                xy([Math.ceil(startX), Math.ceil(startY) - 1]),
+                xy([Math.ceil(startX), Math.ceil(startY)]),
+                xy([Math.floor(startX), Math.ceil(startY)])
+            ], {
+                color: params.color || 'red',
+                fillColor: params.fillColor || '#f0',
+                fillOpacity: params.opacity || 0.5
+            }).addTo(map)
+            if (text.length > 0) {
+                polygon.bindTooltip(text, { permanent: true, className: "my-label", offset: [0, 0] }).openTooltip()
+            }*/
+            var polygon = L.polygon([
+                xy([Math.floor(startX), Math.floor(startY)]),
+                xy([Math.ceil(startX), Math.ceil(startY) - 1]),
+                xy([Math.ceil(startX), Math.ceil(startY)]),
+                xy([Math.floor(startX), Math.ceil(startY)])
+            ], {
+                color: params.color || 'red',
+                fillColor: params.fillColor || '#f0',
+                fillOpacity: params.opacity || 0.5
+                //}).addTo(map)
+            }).addTo(polygonsLayerGroup)
+            /*if (text.length > 0) {
+                polygon.bindTooltip(text, { permanent: true, className: "my-label", offset: [0, 0] }).openTooltip()
+            }*/
+        }
+
+        function drawIDPoint(zoom_value = 0) {
+            /*
+                Шукає піксель за заданим ІД
+                та малює квадрат використвуючи координати Leaflet
+                Потрібно зробити перевертання координати по осі У                
+
+            */
+            let id_val = document.getElementById('id_pixel_input').value;
+            if (Number.isNaN(Number(id_val))) {
+                alert('ONLY numbers ALLOWED')
+            } else if (Number(id_val) > 0) {
+                let x_id = findRowByID(id_val)
+                if (x_id) {
+                    console.log(`FOUND ID=${id_val}`, x_id)
+                    polygonsLayerGroup.clearLayers()
+                    let pos_x = x_id.x
+                    let pos_y = x_id.y
+                    console.log(`drawIDPoint  x=${pos_x},   new Y=${pos_y}`)
+                    draw1pxSquare(pos_x, pos_y, String(id_val), { color: 'transparent', fillColor: 'white', opacity: 0.5 })
+                    map.setView(xy(pos_x, pos_y), 3, { animate: true, duration: 1.2 });
+                    myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
+                    //myPinMarker.setTooltipContent(`ID=${getIDbyXY(pos_x, pos_y)}`)
+                    myPinMarker.setTooltipContent(`${id_val}`)
+                }
+            }
+        }
+
+
+        //******************************************
+
+        function addRow(x, y) {
+            let start_y = circle_center_y - Math.floor(circle_diameter) / 2
+            let local_x = x - circle_center_x
+            let local_y = y - start_y
+            //console.log(`x=${x}, y=${y}, start_y=${start_y},local_x=${local_x}, local_y=${local_y}`)
+            circle_rows_array.push([local_x, local_y])
+        }
+
+        function getVirtualCircleEdgePoints(center_x, center_y, radius) {
+            /*
+           Отримуємо координати границі кола 
+           Координати монітора
+           (0;0)----------->(X)
+                |
+                |
+                |
+                V(Y)
+           */
+            var x = radius;
+            var y = 0;
+            var radiusError = 1 - x;
+            circle_rows_array = []
+            while (x >= y) {
+                addRow(y + center_x, -x + center_y); //1
+                addRow(x + center_x, -y + center_y); //2
+                addRow(x + center_x, y + center_y); //3
+                addRow(y + center_x, x + center_y); //4
+                //addRow(-y + center_x, x + center_y); //5
+                //addRow(-x + center_x, y + center_y); //6
+                //addRow(-x + center_x, -y + center_y);//7
+                //addRow(-y + center_x, -x + center_y); //8
+                y++;
+
+                if (radiusError < 0) {
+                    radiusError += 2 * y + 1;
+                } else {
+                    x--;
+                    radiusError += 2 * (y - x + 1);
+                }
+            }
+        }
+
+        function sortRows() {
+            let sorted_rows = circle_rows_array.sort((first, second) => first[0] - second[0]).sort((first, second) => first[1] - second[1])
+            //            console.log('SORTED_rows', sorted_rows)
+            let circle_rows_array_max = [] //contain max D (X axis)
+            prev_row = { x: 0, y: 0 }
+
+            sorted_rows.forEach(item => {
+                if (item[1] == prev_row.y) {
+                    if (item[0] >= prev_row.x) {
+                        prev_row.x = item[0]
+                    }
+                } else {
+                    circle_rows_array_max.push([prev_row.x, prev_row.y, prev_row.x * 2])
+                    prev_row.x = item[0]
+                    prev_row.y = item[1]
+                }
+            })
+            let last_row = sorted_rows[sorted_rows.length - 1]
+            circle_rows_array_max.push([last_row[0], last_row[1], last_row[0] * 2 + 1])
+            return circle_rows_array_max
+        }
+
+        function updateVirtualCircleModel(circle_rows_array_max) {
+            let accu = 0
+            circle_rows_array_max.forEach(item => {
+                accu += item[2]
+                virtual_circle_model.push({
+                    n: item[1],
+                    y: item[1] + circle_center_y - Math.round(circle_diameter) / 2,
+                    x_l: circle_center_x - item[0],
+                    x_r: circle_center_x + item[0],
+                    r_id: accu,
+                    l_id: accu - (circle_center_x + item[0]) - (circle_center_x - item[0])
+                })
+            })
+            let min_id = virtual_circle_model[0].r_id
+            let max_id = virtual_circle_model[virtual_circle_model.length - 1].r_id
+            //recalc right left ID
+            accu = 0
+            let diff = 0
+            virtual_circle_model.reverse()
+            //console.log('REVERSE', virtual_circle_model)
+            virtual_circle_model.forEach(item => {
+                item.l_id = accu
+                diff = item.x_r - item.x_l
+                accu = accu + diff
+                item.r_id = accu
+            })
+            //----------------------
+            /*virtual_circle_model.forEach(item => {
+                item.r_id = max_id - item.r_id + min_id
+                item.asder = item.x_r - item.x_l
+                item.l_id = item.r_id - (item.x_r - item.x_l)
+            })*/
+            //console.log('MIN_MAX', virtual_circle_model)
+        }
+
+        function resetVirtualCircle() {
+            getVirtualCircleEdgePoints(circle_center_x, circle_center_y, Math.floor(circle_diameter) / 2)
+            updateVirtualCircleModel(sortRows())
+        }
+
+
+        function getIDbyXY(abs_x, abs_y) {
+            /*
+           Отримуємо ID пікселя
+           Координати монітора (абсолютні)
+           Потрібно враховувати відступи????? Вияснити
+           (0;0)----------->(X)
+                |
+                |
+                |
+                V(Y)
+           */
+            //debugger
+            let row = virtual_circle_model.filter(item => item.y == abs_y)
+            //let row = virtual_circle_model.filter(item => item.y == abs_y - 1)
+            if (row.length > 0 && (abs_x >= row[0].x_l && abs_x <= row[0].x_r)) {
+                let q_quantity = row[0].x_r - row[0].x_l
+                if (q_quantity == 0) {
+                    q_quantity = 1
+                }
+                let q_pos = abs_x - row[0].x_l
+                let id = row[0].r_id - q_quantity + q_pos
+                return id
+            } else {
+                return null
+            }
+        }
+        function getRowIDbyXY(abs_x, abs_y) {
+            /*
+           Отримуємо row ID пікселя
+           Координати монітора (абсолютні десятичні 256.00888)
+           Потрібно враховувати відступи????? Вияснити
+           (0;0)----------->(X)
+                |
+                |
+                |
+                V(Y)
+           */
+            let row = virtual_circle_model.filter(item => item.y == abs_y - 1)
+            if (row.length > 0 && (abs_x >= row[0].x_l && abs_x <= row[0].x_r)) {
+                let q_quantity = row[0].x_r - row[0].x_l
+                if (q_quantity == 0) {
+                    q_quantity = 1
+                }
+                return row[0]
+            } else {
+                return null
+            }
+        }
+
+        function findRowByID(id) {
+            let row = virtual_circle_model.filter(item => {
+                if (id <= item.r_id && id >= item.r_id - (item.x_r - item.x_l)) {
+                    return true
+                } else {
+                    return false
+                }
+            })
+            if (row.length > 0) {
+                console.log('findRowByID row=', row)
+                console.log(`X calculation:  ${row[0].x_r} - (${row[0].r_id} - ${id}) `)
+                //let x = row[0].x_r - (row[0].r_id - id) - 1
+                let x = row[0].x_r - (row[0].r_id - id)
+                row[0].x = x
+                //console.log('findRowByID row[0].x=', x)
+                return row[0]
+            } else return null
+        }
+
+
+
+        //-------------------------------------------------------
+        function hideLeafletLink() {
+            document.getElementsByClassName('leaflet-control-attribution leaflet-control')[0].classList.add('hide-leaflet-logo')
+        }
+
+
+
+        function showHideCross() {
+            showCross = !showCross;
+            if (showCross) {
+                drawCross(circle_center_x, circle_center_y, circle_diameter)
+            } else {
+                crossLayerGroup.clearLayers()
+            }
+        }
+
+        function showHideCircle() {
+            showCircle = !showCircle;
+            if (showCircle) {
+                drawCircle(circle_center_x, circle_center_y, circle_diameter, { weight: 2, opacity: 0.01 })
+            } else {
+                circleLayerGroup.clearLayers()
+            }
+        }
+
+        function drawCross(x, y, diameter, ext = 5) {
+            var vert_line = [
+                xy(x, y - Math.ceil(diameter) / 2 - ext),
+                xy(x, y + Math.ceil(diameter) / 2 + ext),
+            ];
+            L.polyline(vert_line, { color: 'blue' }).addTo(crossLayerGroup);
+            var hor_line = [
+                xy(x - Math.ceil(diameter) / 2 - ext, y),
+                xy(x + Math.ceil(diameter) / 2 + ext, y),
+            ];
+            L.polyline(hor_line, { color: 'blue' }).addTo(crossLayerGroup);
+        }
+
+        function drawCircle(x, y, diameter, params) {
+            L.circle(xy([x, y]), {
+                color: params.color || 'red',
+                fillColor: '#f03',
+                fillOpacity: params.opacity || 0.1,
+                stroke: true,
+                weight: params.weight || 2,
+                radius: diameter / 2 + 0.4
+            }).addTo(circleLayerGroup);
+        }
+
+
+
+        function drawImageBoards() {
+            L.polygon([
+                xy([0, 0]),
+                xy([0, image_height]),
+                xy([image_width, image_height]),
+                xy([image_width, 0]),
+
+            ]).addTo(map)
+        }
+
+        function showHideGrid(cellSize = 50) {
+            showGrid = !showGrid
+            if (showGrid) {
+                drawGrid(cellSize)
+            } else {
+                gridLayerGroup.clearLayers()
+            }
+        }
+
+        function drawGrid(cellSize = 50, color = '#bd6e0fe5', weight = 1) {
+            for (let col = 0; col <= image_width; col += cellSize) {
+                L.polyline([xy(col, 0), xy(col, image_width)], { color: color, weight: weight }).addTo(gridLayerGroup);
+
+            }
+            for (let row = 0; row < image_width; row += cellSize) {
+                L.polyline([xy(0, row), xy(image_width, row)], { color: color, weight: weight }).addTo(gridLayerGroup);
+            }
+        }
+
+        function clearMyLayer() {
+            console.log(markersLayerGroup)
+            //markersLayerGroup.clearLayers()
+        }
+
+        function showMyPolygons() {
+            console.log(polygonsLayerGroup)
+            polygonsLayerGroup.clearLayers()
+        }
+
+        //------------------------------------------------------------
+
+        initLMap()
+        hideLeafletLink()
+        //drawCircle(circle_center_x, circle_center_y, circle_diameter, { weight: 4 })
+        //drawCross(circle_center_x, circle_center_y, circle_diameter)
+        resetVirtualCircle();
+        //drawImageBoards()
+
+        /*virtual_circle_model.forEach(item => {
+            draw1pxSquareByID(item.r_id)
+        })*/
+    </script>
+
+</body>
+
+</html>

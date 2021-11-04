@@ -14,6 +14,9 @@
         body,
         html {
             height: 100%;
+            box-sizing: border-box;
+            font-size: 62.5%;
+
         }
 
         body {
@@ -25,8 +28,8 @@
         }
 
         #map {
-            width: 1020px;
-            height: 700px;
+            width: 102rem;
+            height: 70rem;
             margin: 10px 0;
             background: transparent;
 
@@ -121,6 +124,7 @@
             font-size: 15px;
             padding: 5px;
             border-radius: 20px;
+            border: transparent;
         }
 
         .id__controls {
@@ -187,7 +191,7 @@
             <input type="button" value="Круг" onclick="showHideCircle()"><br />
         </div>
 
-        <div class="map__section">
+        <div class="map__section container">
             <div id="map"></div>
         </div>
         <footer class="footer__section">
@@ -209,6 +213,7 @@
         let virtual_circle_model = []
 
         var image_width = 5170, image_height = 5171;
+        var minZoom = -5, maxZoom = 7;
 
         const svgIcon = L.divIcon({
             html: `
@@ -233,7 +238,7 @@
             //iconSize: [24, 40],
             //iconAnchor: [12, 40],
             iconSize: [20, 52],
-            iconAnchor: [20, 52],
+            iconAnchor: [10, 52],
         });
 
         var greenIcon = L.icon({
@@ -280,8 +285,8 @@
             var imgDimensions = { width: image_width, height: image_height } //this is the height and width of the image. It hasn't been loaded yet.
 
             map = L.map('map', {
-                maxZoom: 5,
-                minZoom: -5,
+                maxZoom: maxZoom,
+                minZoom: minZoom,
                 crs: L.CRS.Simple,
                 zoomControl: false,
                 layers: [markersLayerGroup, polygonsLayerGroup, gridLayerGroup, crossLayerGroup, circleLayerGroup]
@@ -330,6 +335,10 @@
                     myPinMarker.setTooltipContent(`${ID}`)
                     polygonsLayerGroup.clearLayers()
                     console.log('NOW WE DRAW', ID)
+                    let x_id = findRowByID(ID)
+                    let pos_x = x_id.x
+                    let pos_y = x_id.y
+                    myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
                     draw1pxSquareByID(ID)
                     console.log(polygonsLayerGroup)
                 } else {
@@ -343,11 +352,14 @@
                 if (currZoom >= showGridByZoom && !isGridVisible()) {
                     //Збільшили
                     showHideGrid(50, true)
+                    //map.dragging.enable();
 
                 } else if (currZoom <= showGridByZoom && isGridVisible()) {
                     showHideGrid(50, false)
+                    //map.dragging.disable();
                 } else {
                     //Без змін
+                    //map.dragging.disable();
                 }
 
 
@@ -356,6 +368,7 @@
             //myGreenPinMarker = L.marker([10, 10], { icon: greenIcon, draggable: true }).addTo(map);
 
             //map.on('click', onMapClick);
+            //map.dragging.disable();
 
         }
 
@@ -776,10 +789,13 @@
 
         initLMap()
         hideLeafletLink()
-        //drawCircle(circle_center_x, circle_center_y, circle_diameter, { weight: 4 })
-        //drawCross(circle_center_x, circle_center_y, circle_diameter)
         resetVirtualCircle();
         //drawImageBoards()
+
+        document.getElementById("id_pixel_input")
+            .addEventListener('change', (e) => {
+                drawIDPoint(5)
+            });
 
         /*virtual_circle_model.forEach(item => {
             draw1pxSquareByID(item.r_id)

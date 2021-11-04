@@ -498,7 +498,10 @@
                     draw1pxSquare(pos_x, pos_y, String(id_val), { color: 'transparent', fillColor: 'white', opacity: 0.5 })
                     //map.setView(xy(pos_x, pos_y), 3, { animate: true, duration: 1.2 });
                     map.setView(xy(circle_center_x, circle_center_y), -3.5, { animate: true, duration: 1.2 });
-                    //map.setView(xy(pos_x, pos_y), -1, { animate: true, duration: 1.2 });
+                    setTimeout(() => {
+                        map.setView(xy(pos_x, pos_y), -1, { animate: true, duration: 3 });
+
+                    }, 3000)
                     myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
                     //myPinMarker.setTooltipContent(`ID=${getIDbyXY(pos_x, pos_y)}`)
                     myPinMarker.setTooltipContent(`${id_val}`)

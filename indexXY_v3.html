@@ -367,7 +367,7 @@
 
             //myGreenPinMarker = L.marker([10, 10], { icon: greenIcon, draggable: true }).addTo(map);
 
-            //map.on('click', onMapClick);
+            map.on('click', onMapClick);
             //map.dragging.disable();
 
         }
@@ -388,21 +388,30 @@
                 .setLatLng(e.latlng)
                 .setContent(`You clicked the map at  ${xy(lng[0], lat[1])}  ID=${ID}`)
                 .openOn(map);*/
-            console.log(`ID=${ID} X=${(lng[0])} Y=${(lat[1])}, X_LNG=${xy(lng[0], lat[1]).lng} Y_LAT=${xy(lng[0], lat[1]).lat}`)
+            //console.log(`ID=${ID} X=${(lng[0])} Y=${(lat[1])}, X_LNG=${xy(lng[0], lat[1]).lng} Y_LAT=${xy(lng[0], lat[1]).lat}`)
             //console.log(`ROW_ID_DATA=`, row_ID)
             let x_id = findRowByID(ID)
-            console.log(`You clicked at X_FULL=${Number(lng[0])} Y_FULL=${Number(lat[1])} x_click=${click_x} y_click=${click_y}`)
-            if (x_id && ID) {
-                let pos_x = x_id.x
-                let pos_y = x_id.y
-                //draw1pxSquare(pos_x, pos_y, String(ID), { color: 'red', fillColor: '#787850' })
-                draw1pxSquare(pos_x, pos_y, ID, { color: 'red', fillColor: '#787850' })
-                map.setView(xy(pos_x, pos_y), 5, { animate: true, duration: 1.2 });
-                myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
-                myPinMarker.setTooltipContent(`${ID}`)
+            //console.log(`You clicked at X_FULL=${Number(lng[0])} Y_FULL=${Number(lat[1])} x_click=${click_x} y_click=${click_y}`)
+            if (map.getZoom() > showGridByZoom) {
+                if (x_id && ID) {
+                    /*let pos_x = x_id.x
+                    let pos_y = x_id.y
+                    //draw1pxSquare(pos_x, pos_y, String(ID), { color: 'red', fillColor: '#787850' })
+                    draw1pxSquare(pos_x, pos_y, ID, { color: 'red', fillColor: '#787850' })
+                    map.setView(xy(pos_x, pos_y), 5, { animate: true, duration: 1.2 });
+                    myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
+                    myPinMarker.setTooltipContent(`${ID}`)*/
 
-            } else {
-                draw1pxSquare(click_x, click_y, 'BO', { color: 'lime', fillColor: '#787850' })
+                    myPinMarker.setTooltipContent(`${ID}`)
+                    polygonsLayerGroup.clearLayers()
+                    let pos_x = x_id.x
+                    let pos_y = x_id.y
+                    myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
+                    draw1pxSquareByID(ID)
+
+                } else {
+                    draw1pxSquare(click_x, click_y, 'BO', { color: 'lime', fillColor: '#787850' })
+                }
             }
         }
 

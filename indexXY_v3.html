@@ -288,7 +288,7 @@
                 maxZoom: maxZoom,
                 minZoom: minZoom,
                 crs: L.CRS.Simple,
-                zoomControl: false,
+                //zoomControl: false,
                 layers: [markersLayerGroup, polygonsLayerGroup, gridLayerGroup, crossLayerGroup, circleLayerGroup]
             })
             //map.setView([imgDimensions.height / 2, imgDimensions.width / 2], 0);
@@ -499,7 +499,7 @@
                     //map.setView(xy(pos_x, pos_y), 3, { animate: true, duration: 1.2 });
                     map.setView(xy(circle_center_x, circle_center_y), -3.5, { animate: true, duration: 1.2 });
                     setTimeout(() => {
-                        map.setView(xy(pos_x, pos_y), -1, { animate: true, duration: 3 });
+                        map.setView(xy(pos_x, pos_y), maxZoom, { animate: true, duration: 3 });
 
                     }, 3000)
                     myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));

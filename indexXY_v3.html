@@ -213,7 +213,7 @@
         let virtual_circle_model = []
 
         var image_width = 5170, image_height = 5171;
-        var minZoom = -5, maxZoom = 7;
+        var minZoom = -5, maxZoom = 6;
 
         const svgIcon = L.divIcon({
             html: `
@@ -253,7 +253,7 @@
         });
 
 
-        var showGridByZoom = -1
+        var showGridByZoom = 5
         var markersOnLayer = []
         var squaresOnLayer = []
         var crossOnLayer = []
@@ -323,7 +323,7 @@
             });*/
 
             myPinMarker = L.marker([10000, 10000], { icon: svgIcon, title: "MyPoint", alt: "The Big I", draggable: true }).addTo(map)
-            myPinMarker.bindTooltip("", { permanent: true, direction: 'top', className: "my-label", offset: [-10, -55] }).openTooltip()
+            myPinMarker.bindTooltip("", { permanent: true, direction: 'top', className: "my-label", offset: [0, -55] }).openTooltip()
             myPinMarker.on('dragend', function () {
                 var coord = String(myPinMarker.getLatLng()).split(',');
                 var lat = coord[0].split('(');
@@ -351,11 +351,11 @@
                 console.log(`currZoom=${currZoom}`)
                 if (currZoom >= showGridByZoom && !isGridVisible()) {
                     //Збільшили
-                    showHideGrid(50, true)
+                    showHideGrid(1, true)
                     //map.dragging.enable();
 
                 } else if (currZoom <= showGridByZoom && isGridVisible()) {
-                    showHideGrid(50, false)
+                    showHideGrid(1, false)
                     //map.dragging.disable();
                 } else {
                     //Без змін
@@ -496,7 +496,9 @@
                     let pos_y = x_id.y
                     console.log(`drawIDPoint  x=${pos_x},   new Y=${pos_y}`)
                     draw1pxSquare(pos_x, pos_y, String(id_val), { color: 'transparent', fillColor: 'white', opacity: 0.5 })
-                    map.setView(xy(pos_x, pos_y), 3, { animate: true, duration: 1.2 });
+                    //map.setView(xy(pos_x, pos_y), 3, { animate: true, duration: 1.2 });
+                    map.setView(xy(circle_center_x, circle_center_y), -3.5, { animate: true, duration: 1.2 });
+                    //map.setView(xy(pos_x, pos_y), -1, { animate: true, duration: 1.2 });
                     myPinMarker.setLatLng(xy(pos_x + 0.5, pos_y + 0.5));
                     //myPinMarker.setTooltipContent(`ID=${getIDbyXY(pos_x, pos_y)}`)
                     myPinMarker.setTooltipContent(`${id_val}`)

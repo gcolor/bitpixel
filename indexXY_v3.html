@@ -248,7 +248,7 @@
         });
 
 
-
+        var showGridByZoom = -1
         var markersOnLayer = []
         var squaresOnLayer = []
         var crossOnLayer = []
@@ -337,6 +337,22 @@
                 }
             });
 
+            map.on('zoomend', function (e) {
+                var currZoom = map.getZoom();
+                console.log(`currZoom=${currZoom}`)
+                if (currZoom >= showGridByZoom && !isGridVisible()) {
+                    //Збільшили
+                    showHideGrid(50, true)
+
+                } else if (currZoom <= showGridByZoom && isGridVisible()) {
+                    showHideGrid(50, false)
+                } else {
+                    //Без змін
+                }
+
+
+            });
+
             //myGreenPinMarker = L.marker([10, 10], { icon: greenIcon, draggable: true }).addTo(map);
 
             //map.on('click', onMapClick);
@@ -376,6 +392,11 @@
                 draw1pxSquare(click_x, click_y, 'BO', { color: 'lime', fillColor: '#787850' })
             }
         }
+
+
+
+
+        //----------------------------------------
 
 
         function draw1pxSquareByID(ID) {
@@ -653,8 +674,6 @@
             document.getElementsByClassName('leaflet-control-attribution leaflet-control')[0].classList.add('hide-leaflet-logo')
         }
 
-
-
         function showHideCross() {
             showCross = !showCross;
             if (showCross) {
@@ -709,12 +728,27 @@
             ]).addTo(map)
         }
 
-        function showHideGrid(cellSize = 50) {
-            showGrid = !showGrid
-            if (showGrid) {
-                drawGrid(cellSize)
-            } else {
+        function isGridVisible() {
+            return gridLayerGroup.getLayers().length > 0
+        }
+
+        function showHideGrid(cellSize = 50, show = null) {
+            if (show == true) {
                 gridLayerGroup.clearLayers()
+                drawGrid(cellSize)
+                //console.log(gridLayerGroup.getLayers().length)
+            }
+            if (show == false) {
+                gridLayerGroup.clearLayers()
+                //console.log(gridLayerGroup.getLayers().length)
+            }
+            if (show === null) {
+                showGrid = !showGrid
+                if (showGrid) {
+                    drawGrid(cellSize)
+                } else {
+                    gridLayerGroup.clearLayers()
+                }
             }
         }
 

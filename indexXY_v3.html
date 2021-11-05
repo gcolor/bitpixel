@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/normalize.css@8.0.1/normalize.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
         crossorigin="" />
@@ -34,8 +35,8 @@
 
         #map {
             width: 102rem;
-            height: 86rem;
-            margin: 50px 0;
+            height: 50rem;
+            margin-top: 1.5rem;
             background: transparent;
 
         }
@@ -90,8 +91,8 @@
 
         .info__section_data {
             color: rgba(58, 53, 53, 0.808);
-            font-size: 16px;
-            line-height: 1.5;
+            font-size: 1.4rem;
+            line-height: 1.7;
         }
 
         .search__section_data {
@@ -136,12 +137,10 @@
             display: none;
         }
 
-        .footer__section {
-            margin-top: 5rem;
-        }
+        .footer__section {}
 
         .footer__data {
-            padding: 5rem;
+            padding: 1rem;
             text-align: center;
         }
 
@@ -198,11 +197,6 @@
             </div>
         </div>
 
-        <div class="id__controls">
-            <input type="button" value="Сітка" onclick="showHideGrid(10)"><br />
-            <input type="button" value="Хрестик" onclick="showHideCross()"><br />
-            <input type="button" value="Круг" onclick="showHideCircle()"><br />
-        </div>
 
         <div class="map__section container">
             <div id="map"></div>
@@ -259,14 +253,14 @@
         let virtual_circle_model = []
 
         var image_width = 5171, image_height = 5171;
-        var minZoom = -3.5, maxZoom = 6;
-        var resetPositionZoom = -2
+        var minZoom = -4, maxZoom = 6;
+        var resetPositionZoom = -1
         var circle_center_x = 5170 / 2, circle_center_y = 5170 / 2, circle_diameter = 5170;
         //circle_center_x та circle_center_y - координати Leaflet
 
 
         var showGridByZoom = 5
-        var showZoomedPixelDelay = 1 //sec
+        var showZoomedPixelDelay = 3 //sec
         var markersOnLayer = []
         var squaresOnLayer = []
         var crossOnLayer = []
@@ -327,7 +321,7 @@
             L.imageOverlay(imageUrl, imageBounds).addTo(map);
 
             map.fitBounds(imageBounds);
-            map.setView(xy(circle_center_x, circle_center_y), -3.5);
+            map.setView(xy(circle_center_x, circle_center_y), minZoom);
 
             map.on('zoom', function (e) {
                 var currZoom = map.getZoom();
@@ -349,7 +343,7 @@
                 }
                 if (currZoom < resetPositionZoom) {
                     //debugger
-                    map.setView(xy(circle_center_x, circle_center_y), -3.5);
+                    map.setView(xy(circle_center_x, circle_center_y), minZoom);
                     map.dragging.disable()
                     map.scrollWheelZoom.disable()
                 }
@@ -393,7 +387,7 @@
             }
         }
         //-----------------------------------------
-        function addMarker(marker_x, marker_y, layer, params = { icon: svgIcon, title: "MyPoint", alt: "The Big I", draggable: true }, clearSquareLayer = true) {
+        function addMarker(marker_x, marker_y, layer, params = { icon: svgIcon, title: "", alt: "", draggable: true }, clearSquareLayer = true) {
             /*marker_x,marker_y - координати в Leaflet
             params = { icon: svgIcon, title: "MyPoint", alt: "The Big I", draggable: true }            
             */

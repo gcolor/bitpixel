@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Map 1</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
@@ -34,7 +35,7 @@
         }
 
         #map {
-            width: 102rem;
+            width: 100%;
             height: 65rem;
             margin-top: 1.5rem;
             background: transparent;
@@ -63,14 +64,15 @@
             justify-content: center;
         }
 
-        .outer_container {
+        .outer__container {
             flex: 1 0 auto;
         }
 
         .container {
-            max-width: 1020px;
+            max-width: 102rem;
             margin: 0 auto;
         }
+
 
         .head__section_data {
             padding: 15px 0;
@@ -101,7 +103,7 @@
         .search_bar {
             position: relative;
             margin: 0 auto;
-            width: 630px;
+            width: 63rem;
         }
 
         #id_pixel_input {
@@ -164,6 +166,59 @@
 
         input:focus::placeholder {
             color: transparent;
+        }
+
+        @media (max-width: 375px) {
+            .container {
+                max-width: 34rem;
+            }
+
+            .search_bar {
+                width: 30rem;
+
+            }
+
+            #id_pixel_input {
+                height: 3rem;
+                font-size: 1.2rem;
+            }
+
+            #id_go {
+                width: 7rem;
+                height: 2.6rem;
+                top: 3px;
+                font-size: 1.2rem;
+            }
+
+            #map {
+                height: 35rem;
+            }
+        }
+
+        @media (max-width: 414px) {
+            .container {
+                max-width: 37rem;
+            }
+
+            .search_bar {
+                width: 35rem;
+            }
+
+            #id_pixel_input {
+                height: 3rem;
+                font-size: 1.2rem;
+            }
+
+            #id_go {
+                width: 10rem;
+                height: 2.6rem;
+                top: 3px;
+                font-size: 1.2rem;
+            }
+
+            #map {
+                height: 33rem;
+            }
         }
     </style>
 </head>
@@ -253,6 +308,11 @@
 
         var image_width = 5171, image_height = 5171;
         var minZoom = -3.5, maxZoom = 6;
+        //for screen width 375 set minZoom = -4.5
+        //for other set -3.5
+        if (screen.width <= 960) {
+            minZoom = -4.5
+        }
         var resetPositionZoom = -1
         var circle_center_x = 5170 / 2, circle_center_y = 5170 / 2, circle_diameter = 5170;
         //circle_center_x та circle_center_y - координати Leaflet

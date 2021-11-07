@@ -130,8 +130,8 @@
             font-weight: 500;
             font-size: 15px;
             padding: 5px;
-            border-radius: 20px;
-            border: transparent;
+            border-radius: 23px;
+            border: 1px solid #000;
         }
 
         .id__controls {
@@ -198,7 +198,7 @@
             }
 
             #id_go {
-                width: 10rem;
+                width: 9rem;
                 height: 2.6rem;
                 top: 3px;
                 font-size: 1.2rem;
@@ -329,12 +329,13 @@
             minZoom = -4.5
         }
         //alert(`${screen.width}, ${screen.height}`)
-        var resetPositionZoom = -1
+        var resetPositionZoom = 2 //when we have currentZoom=2 then set Zoom to minZoom
         var circle_center_x = 5170 / 2, circle_center_y = 5170 / 2, circle_diameter = 5170;
         //circle_center_x та circle_center_y - координати Leaflet
 
 
         var showGridByZoom = 5
+        var gridSize = 50 //actualy add 50 to left and to right, top and bottom
         var showZoomedPixelDelay = 3 //sec
         var markersOnLayer = []
         var squaresOnLayer = []
@@ -355,6 +356,11 @@
 
         var yx = L.latLng;
         var xy = function (x, y) {
+            /*
+            Coordinates in CRS.Simple take the form of [y, x] instead of [x, y], in the same way Leaflet uses [lat, lng] instead of [lng, lat].
+            LAT->Y coordinete
+            LNG->X coordinete
+            */
             if (L.Util.isArray(x)) {    // When doing xy([x, y]);
                 return yx(x[1], x[0]);
             }
@@ -414,7 +420,7 @@
 
                 } else if (currZoom <= showGridByZoom && isGridVisible()) {
                     showHideGrid(1, false)
-                    //map.dragging.disable();
+                    map.dragging.disable();
                 }
                 if (currZoom < resetPositionZoom) {
                     //debugger
@@ -425,9 +431,8 @@
                 if (currZoom > resetPositionZoom) {
                     map.dragging.enable()
                 }
-
-
             });
+
 
 
             //myGreenPinMarker = L.marker([10, 10], { icon: greenIcon, draggable: true }).addTo(map);
@@ -472,7 +477,7 @@
             let myPinMarker = L.marker([marker_x, marker_y], params).addTo(layer)
             myPinMarker.bindTooltip("", { permanent: true, direction: 'top', className: "my-label", offset: [0, -55] }).openTooltip()
             myPinMarker.on('dragend', function (e) {
-                console.log('dragged', e.target._leaflet_id)
+                //console.log('dragged', e.target._leaflet_id)
                 var coord = String(myPinMarker.getLatLng()).split(',');
                 var lat = coord[0].split('(');
                 var lng = coord[1].split(')');
@@ -856,9 +861,23 @@
         }
 
         function showHideGrid(cellSize = 50, show = null) {
-            if (show == true) {
+            function calcBoundsAndDrawGrid() {
+                //get active visible bounds of map
+                let bounds = map.getBounds()
+                let leftTopX = Math.floor(bounds._northEast.lng)
+                let leftTopY = Math.floor(bounds._northEast.lat)
+                let rightBottomX = Math.round(bounds._southWest.lng)
+                let rightBottomY = Math.round(bounds._southWest.lat)
+                //get center of view
+                let posX = leftTopX + Math.floor((rightBottomX - leftTopX) / 2)
+                let posY = rightBottomY + Math.floor((leftTopY - rightBottomY) / 2)
+                // console.log(`posX = ${posX} posY=${posY}`)
                 gridLayerGroup.clearLayers()
-                drawGrid(cellSize)
+                drawGridXY(posX, posY)
+            }
+            if (show == true) {
+                calcBoundsAndDrawGrid()
+                //drawGrid(cellSize)                
                 //console.log(gridLayerGroup.getLayers().length)
             }
             if (show == false) {
@@ -868,7 +887,8 @@
             if (show === null) {
                 showGrid = !showGrid
                 if (showGrid) {
-                    drawGrid(cellSize)
+                    calcBoundsAndDrawGrid()
+                    //drawGrid(cellSize)
                 } else {
                     gridLayerGroup.clearLayers()
                 }
@@ -883,6 +903,27 @@
             for (let row = 0; row < image_width + 1; row += cellSize) {
                 L.polyline([xy(0, row), xy(image_width, row)], { color: color, weight: weight }).addTo(gridLayerGroup);
             }
+        }
+
+        function drawGridXY(posX, posY, size = gridSize, cellSize = 1, color = '#bd6e0fe5', weight = 1) {
+            /*
+            */
+            //vertical X col=x
+            for (let colX = 0; colX <= size * 2; colX += cellSize) {
+                //console.log(`colX=${colX},x=${posX - size + colX}, y=${posY - size}, '|', x=${posX - size + colX}, y=${posY + size}`)
+                L.polyline([xy(posX - size + colX, posY - size), xy(posX - size + colX, posY + size)],
+                    { color: color, weight: weight }).addTo(gridLayerGroup);
+
+            }
+            //horizontal y=row
+            for (let rowY = 0; rowY <= size * 2; rowY += cellSize) {
+                //console.log(`rowY=${rowY},x=${posX - size}, y=${posY - size + rowY}, '|', x=${posX + size}, y=${posY - size + rowY}`)
+                //L.polyline([xy(posX - size, posY - size + rowY), xy(posX + size, posY - size + rowY)],
+                L.polyline([xy(posX - size, posY - size + rowY), xy(posX + size, posY - size + rowY)],
+                    { color: color, weight: weight }).addTo(gridLayerGroup);
+            }
+
+
         }
 
         function clearMyLayer() {
@@ -905,6 +946,7 @@
         initLMap()
         hideLeafletLink()
         resetVirtualCircle();
+        //drawGridXY(circle_center_x, circle_center_y)
         //drawImageBoards()
 
         //addMarker(10, 10, markersLayerGroup)
